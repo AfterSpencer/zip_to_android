@@ -1,0 +1,78 @@
+tell application "Finder"
+	
+	display dialog "Download the latest firmware for the 
+
+\"bullhead\" for Nexus 5X 
+
+on the page that opens.
+You may need to click agree to get to the downnloads page." buttons {"OK", "I have it already"} default button "OK"
+	set dlfile to button returned of result
+	if dlfile = "OK" then
+		
+		tell application "Google Chrome"
+			activate
+			open location "https://developers.google.com/android/images"
+			delay 1
+			activate
+		end tell
+		display dialog "When download is finished click OK." buttons "OK"
+	end if
+	
+	display dialog "Select zip file to transfer to device." buttons "OK"
+	set Image to choose file
+	set ImageP to POSIX path of Image
+	set FileType to (do shell script "cut -d '.' -f2<<<" & ImageP)
+	
+	if FileType = "zip" then
+		
+		repeat
+			display dialog "Transferring file to phone.
+Be sure your phone is plugged in and unlocked." buttons {"OK", "Cancel"} default button "OK"
+			set tryagain to button returned of the result
+			if tryagain = "Cancel" then
+				exit repeat
+			end if
+			
+			set DeviceStatus to (do shell script "/usr/local/bin/adb devices | head -n 2 | tail -n 1 | awk '{print $2}'")
+			try
+				#display dialog DeviceStatus
+				
+				if DeviceStatus = "device" then
+					
+					tell application "Terminal"
+						activate
+						do script "/usr/local/bin/adb push " & ImageP & " /sdcard/updatestuff && sleep 10 && killall Terminal"
+						
+					end tell
+					
+					repeat
+						tell application "System Events"
+							if "Terminal" is not in (name of application processes) then exit repeat
+						end tell
+						delay 5
+					end repeat
+					
+					exit repeat
+					
+				else
+					if DeviceStatus = "unauthorized" then
+						display dialog "Please allow USB Debugging on your phone and try again." buttons "OK"
+					else
+						display dialog "Phone not detected. Check USB connection." buttons "OK"
+					end if
+				end if
+			end try
+		end repeat
+	else
+		display dialog "File selected doesn't seem right.
+Verify it is a zip file and please try again." buttons "OK"
+		return
+	end if
+	
+	display dialog "File copied to /sdcard/updatestuff/" & ImageP & "
+Use FlashFire to flash Firmware Package." buttons "OK"
+	
+	
+	
+end tell
+
