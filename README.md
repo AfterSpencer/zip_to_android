@@ -6,5 +6,5 @@ It can be used to transfer other zip files to the same location.
 
 # Dependencies
 
-Android Debug Bridge (adb) must be located in /usr/local/bin. I suggest installing it from [Homebrew](http://brew.sh/) by running `brew install android-platform-tools`in terminal after Homebrew is installed.
+Android Debug Bridge (adb) must be located in /usr/local/bin. The application will prompt for install of brew and adb if it is not installed.
 
