@@ -1,5 +1,28 @@
 tell application "Finder"
 	
+	set adb_installed to (do shell script "if [ `ls /usr/local/bin/adb` = \"/usr/local/bin/adb\" ]; then echo exists; else echo does not exist; fi")
+	if adb_installed = "does not exist" then
+		display dialog "ADB not found. OK to install?" buttons {"OK", "Cancel"} default button "OK"
+		set install_adb to button returned of the result
+		if install_adb = "OK" then
+			display dialog "Terminal will open, please follow prompts to install brew.
+Password may be required" buttons {"OK"} default button "OK"
+			
+			tell application "Terminal"
+				activate
+				do script "/usr/bin/ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\" && brew install android-platform-tools && killall Terminal"
+			end tell
+		end if
+		
+		repeat
+			tell application "System Events"
+				if "Terminal" is not in (name of application processes) then exit repeat
+			end tell
+			delay 5
+		end repeat
+		
+	end if
+	
 	display dialog "Download the latest firmware for the 
 
 \"bullhead\" for Nexus 5X 
@@ -65,14 +88,17 @@ Be sure your phone is plugged in and unlocked." buttons {"OK", "Cancel"} default
 		end repeat
 	else
 		display dialog "File selected doesn't seem right.
+		
 Verify it is a zip file and please try again." buttons "OK"
 		return
 	end if
 	
 	display dialog "File copied to /sdcard/updatestuff/" & ImageP & "
+	
 Use FlashFire to flash Firmware Package." buttons "OK"
 	
 	
 	
 end tell
+
 
